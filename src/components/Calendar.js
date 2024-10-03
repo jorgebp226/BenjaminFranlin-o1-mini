@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Auth } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/api';
-import { listVirtudes, getSemana } from '../graphql/queries';
+import { listVirtuds, getSemana } from '../graphql/queries';
 import { createSemana, updateSemana } from '../graphql/mutations';
 import { getWeekNumber, getCurrentWeek } from '../utils/dateUtils'; // Funciones para obtener la semana actual
 import './Calendar.css'; // CSS para estilizar el calendario
@@ -14,8 +14,8 @@ const Calendar = () => {
 
   useEffect(() => {
     const fetchVirtudes = async () => {
-      const result = await client.graphql({ query: listVirtudes });
-      setVirtudes(result.data.listVirtudes.items);
+      const result = await client.graphql({ query: listVirtuds });
+      setVirtudes(result.data.listVirtuds.items);
     };
 
     const fetchSemana = async () => {
