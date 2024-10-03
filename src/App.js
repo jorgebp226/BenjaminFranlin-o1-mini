@@ -1,6 +1,7 @@
 // src/App.js
 import React from 'react';
-import { Amplify, generateClient } from 'aws-amplify'; // Importamos Amplify y generateClient
+import { Amplify } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/api';
 import awsExports from './aws-exports'; // Archivo de configuración de Amplify
 import { withAuthenticator } from '@aws-amplify/ui-react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';

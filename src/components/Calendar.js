@@ -1,6 +1,7 @@
 // src/components/Calendar.js
 import React, { useState, useEffect } from 'react';
-import { Amplify, generateClient } from 'aws-amplify'; // Importamos generateClient
+import { Amplify } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/api';
 import { listVirtuds, getSemana } from '../graphql/queries';
 import { createSemana, updateSemana } from '../graphql/mutations';
 import { getWeekNumber, getCurrentWeek } from '../utils/dateUtils'; // Funciones personalizadas para manejar semanas
