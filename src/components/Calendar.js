@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, Auth } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { listVirtuds, getSemana } from '../graphql/queries';
 import { createSemana, updateSemana } from '../graphql/mutations';

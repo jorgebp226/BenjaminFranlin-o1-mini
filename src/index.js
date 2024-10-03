@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { Amplify } from 'aws-amplify';
+import { AmplifyProvider } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import config from './amplifyconfiguration.json';
 
 Amplify.configure(config);
