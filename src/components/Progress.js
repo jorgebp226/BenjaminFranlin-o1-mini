@@ -11,13 +11,17 @@ const Progress = () => {
   const [dataGrafico, setDataGrafico] = useState([]);
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
+  const client = generateClient();
 
   useEffect(() => {
     const fetchData = async () => {
       const user = await Auth.currentAuthenticatedUser();
-      const result = await client.graphql({ query: listSemanas, variables: { filter: { userId: { eq: user.attributes.sub } } } });
+      const result = await client.graphql({
+        query: listSemanas,
+        variables: { filter: { userId: { eq: user.attributes.sub } } }
+      });
       setSemanaList(result.data.listSemanas.items);
-      // Obtener las virtudes para los labels
+      
       const virtudesResult = await client.graphql({ query: listVirtudes });
       setVirtudes(virtudesResult.data.listVirtudes.items);
     };

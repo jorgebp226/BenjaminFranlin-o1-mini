@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Auth } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/api';
-import { listVirtudes, listSemanas } from '../graphql/queries';
+import { listVirtudes, getSemana } from '../graphql/queries';
 import { createSemana, updateSemana } from '../graphql/mutations';
 import { getWeekNumber, getCurrentWeek } from '../utils/dateUtils'; // Funciones para obtener la semana actual
 import './Calendar.css'; // CSS para estilizar el calendario
@@ -10,11 +10,11 @@ const Calendar = () => {
   const [virtudes, setVirtudes] = useState([]);
   const [semana, setSemana] = useState(null);
   const [currentWeek, setCurrentWeek] = useState(getCurrentWeek());
+  const client = generateClient();
 
   useEffect(() => {
     const fetchVirtudes = async () => {
-      // Obtener las 13 virtudes desde la base de datos
-      const result = await API.graphql(graphqlOperation(listVirtudes));
+      const result = await client.graphql({ query: listVirtudes });
       setVirtudes(result.data.listVirtudes.items);
     };
 
@@ -22,19 +22,24 @@ const Calendar = () => {
       const user = await Auth.currentAuthenticatedUser();
       const semanaActual = getCurrentWeek();
       try {
-        const result = await API.graphql(graphqlOperation(getSemana, { userId: user.attributes.sub, semana: semanaActual }));
+        const result = await client.graphql({
+          query: getSemana,
+          variables: { userId: user.attributes.sub, semana: semanaActual }
+        });
         if (result.data.getSemana) {
           setSemana(result.data.getSemana);
         } else {
-          // Crear nueva semana
           const virtudObjetivo = virtudes[(getWeekNumber(new Date()) % 13)];
           const nuevaSemana = {
             userId: user.attributes.sub,
             semana: semanaActual,
             virtudObjetivo: virtudObjetivo.id,
-            dias: crearDiasDeSemana() // Función para crear los días de la semana con virtudes en estado 0
+            dias: crearDiasDeSemana()
           };
-          const createResult = await API.graphql(graphqlOperation(createSemana, { input: nuevaSemana }));
+          const createResult = await client.graphql({
+            query: createSemana,
+            variables: { input: nuevaSemana }
+          });
           setSemana(createResult.data.createSemana);
         }
       } catch (error) {
@@ -64,28 +69,30 @@ const Calendar = () => {
   };
 
   const handleEstadoChange = async (fecha, idVirtud, nuevoEstado) => {
-    const user = await Auth.currentAuthenticatedUser();
-    const semanaActualizada = { ...semana };
-    semanaActualizada.dias = semanaActualizada.dias.map(dia => {
-      if (dia.fecha === fecha) {
-        return {
-          ...dia,
-          virtudes: dia.virtudes.map(v => {
-            if (v.idVirtud === idVirtud) {
-              return { ...v, estado: nuevoEstado };
-            }
-            return v;
-          })
-        };
-      }
-      return dia;
-    });
-  
+    const semanaActualizada = {
+      ...semana,
+      dias: semana.dias.map(dia => {
+        if (dia.fecha === fecha) {
+          return {
+            ...dia,
+            virtudes: dia.virtudes.map(v => 
+              v.idVirtud === idVirtud ? { ...v, estado: nuevoEstado } : v
+            )
+          };
+        }
+        return dia;
+      })
+    };
+
+    setSemana(semanaActualizada);
+
     try {
-      await API.graphql(graphqlOperation(updateSemana, { input: semanaActualizada }));
-      setSemana(semanaActualizada);
+      await client.graphql({
+        query: updateSemana,
+        variables: { input: semanaActualizada }
+      });
     } catch (error) {
-      console.error('Error updating estado:', error);
+      console.error('Error updating semana:', error);
     }
   };
 
