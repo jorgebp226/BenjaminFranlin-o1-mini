@@ -26,7 +26,7 @@ const Calendar = () => {
         try {
           const result = await client.graphql({
             query: getSemana,
-            variables: { userId: user.attributes.sub, semana: semanaActual }
+            variables: { userId: username, semana: semanaActual }
           });
           if (result.data.getSemana) {
             setSemana(result.data.getSemana);
