@@ -1,0 +1,29 @@
+.calendar-container {
+    padding: 20px;
+  }
+  
+  .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .calendar-table th,
+  .calendar-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .estado-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 0 auto;
+    cursor: pointer;
+    border: 1px solid #ccc;
+  }
+  
+  .highlight {
+    background-color: #f0f8ff;
+  }
+  
