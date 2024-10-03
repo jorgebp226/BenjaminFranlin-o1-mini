@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Auth } from 'aws-amplify';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
-import { listVirtudes, listSemanas } from '../graphql/queries';
+import { listVirtuds, listSemanas } from '../graphql/queries';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { getVirtudRating } from '../utils/dataProcessing'; // Función para procesar datos
 
@@ -15,15 +15,19 @@ const Progress = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = await Auth.currentAuthenticatedUser();
-      const result = await client.graphql({
-        query: listSemanas,
-        variables: { filter: { userId: { eq: user.attributes.sub } } }
-      });
-      setSemanaList(result.data.listSemanas.items);
-      
-      const virtudesResult = await client.graphql({ query: listVirtudes });
-      setVirtudes(virtudesResult.data.listVirtudes.items);
+      try {
+        const { username, userId } = await getCurrentUser();
+        const result = await client.graphql({
+          query: listSemanas,
+          variables: { filter: { userId: { eq: userId } } }
+        });
+        setSemanaList(result.data.listSemanas.items);
+        
+        const virtudesResult = await client.graphql({ query: listVirtuds });
+        setVirtudes(virtudesResult.data.listVirtuds.items);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
     fetchData();
   }, []);
