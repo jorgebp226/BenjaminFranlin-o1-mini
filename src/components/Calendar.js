@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { API, Auth, graphqlOperation } from 'aws-amplify';
-import { getSemana, createSemana, updateEstadoVirtud } from '../graphql/queries';
-import { listVirtudes } from '../graphql/queries'; // Asumiendo que tienes un query para listar las virtudes
+import React, { useState, useEffect } from 'react';
+import { Auth } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/api';
+import { listVirtudes, listSemanas } from '../graphql/queries';
+import { createSemana, updateSemana } from '../graphql/mutations';
 import { getWeekNumber, getCurrentWeek } from '../utils/dateUtils'; // Funciones para obtener la semana actual
 import './Calendar.css'; // CSS para estilizar el calendario
 

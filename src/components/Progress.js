@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { API, Auth, graphqlOperation } from 'aws-amplify';
-import { listSemanas } from '../graphql/queries';
+import React, { useState, useEffect } from 'react';
+import { Auth } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/api';
+import { listVirtudes, listSemanas } from '../graphql/queries';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { getVirtudRating } from '../utils/dataProcessing'; // Función para procesar datos
 
@@ -14,10 +15,10 @@ const Progress = () => {
   useEffect(() => {
     const fetchData = async () => {
       const user = await Auth.currentAuthenticatedUser();
-      const result = await API.graphql(graphqlOperation(listSemanas, { filter: { userId: { eq: user.attributes.sub } } }));
+      const result = await client.graphql({ query: listSemanas, variables: { filter: { userId: { eq: user.attributes.sub } } } });
       setSemanaList(result.data.listSemanas.items);
       // Obtener las virtudes para los labels
-      const virtudesResult = await API.graphql(graphqlOperation(listVirtudes));
+      const virtudesResult = await client.graphql({ query: listVirtudes });
       setVirtudes(virtudesResult.data.listVirtudes.items);
     };
     fetchData();
