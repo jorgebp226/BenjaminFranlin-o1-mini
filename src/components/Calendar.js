@@ -1,10 +1,13 @@
 // src/components/Calendar.js
 import React, { useState, useEffect } from 'react';
-import { Auth, API } from 'aws-amplify'; // Importa Auth y API directamente desde 'aws-amplify'
+import { Amplify, generateClient } from 'aws-amplify'; // Importamos generateClient
 import { listVirtuds, getSemana } from '../graphql/queries';
 import { createSemana, updateSemana } from '../graphql/mutations';
 import { getWeekNumber, getCurrentWeek } from '../utils/dateUtils'; // Funciones personalizadas para manejar semanas
 import './Calendar.css'; // Estilos de la página de calendario
+
+// Configuración del cliente de GraphQL
+const client = generateClient();
 
 const Calendar = () => {
   const [virtudes, setVirtudes] = useState([]);
@@ -15,7 +18,7 @@ const Calendar = () => {
   useEffect(() => {
     const fetchVirtudes = async () => {
       try {
-        const result = await API.graphql({ query: listVirtuds });
+        const result = await client.graphql({ query: listVirtuds });
         setVirtudes(result.data.listVirtuds.items);
       } catch (error) {
         console.error('Error fetching virtudes:', error);
@@ -24,9 +27,9 @@ const Calendar = () => {
 
     const fetchSemana = async () => {
       try {
-        const user = await Auth.currentAuthenticatedUser(); // Obtenemos el usuario autenticado
+        const user = await Amplify.Auth.currentAuthenticatedUser(); // Obtenemos el usuario autenticado
         const semanaActual = getCurrentWeek();
-        const result = await API.graphql({
+        const result = await client.graphql({
           query: getSemana,
           variables: { userId: user.username, semana: semanaActual },
         });
@@ -41,7 +44,7 @@ const Calendar = () => {
             virtudObjetivo: virtudObjetivo.id,
             dias: crearDiasDeSemana(virtudes),
           };
-          const createResult = await API.graphql({
+          const createResult = await client.graphql({
             query: createSemana,
             variables: { input: nuevaSemana },
           });
@@ -93,7 +96,7 @@ const Calendar = () => {
     setSemana(semanaActualizada); // Actualizamos el estado local
 
     try {
-      await API.graphql({
+      await client.graphql({
         query: updateSemana,
         variables: { input: semanaActualizada }, // Enviamos la actualización a través de la API GraphQL
       });
