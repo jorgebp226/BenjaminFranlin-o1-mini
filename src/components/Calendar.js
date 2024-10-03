@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Auth } from 'aws-amplify';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { listVirtuds, getSemana } from '../graphql/queries';
 import { createSemana, updateSemana } from '../graphql/mutations';
@@ -19,31 +19,36 @@ const Calendar = () => {
     };
 
     const fetchSemana = async () => {
-      const user = await Auth.currentAuthenticatedUser();
-      const semanaActual = getCurrentWeek();
       try {
-        const result = await client.graphql({
-          query: getSemana,
-          variables: { userId: user.attributes.sub, semana: semanaActual }
-        });
-        if (result.data.getSemana) {
-          setSemana(result.data.getSemana);
-        } else {
-          const virtudObjetivo = virtudes[(getWeekNumber(new Date()) % 13)];
-          const nuevaSemana = {
-            userId: user.attributes.sub,
-            semana: semanaActual,
-            virtudObjetivo: virtudObjetivo.id,
-            dias: crearDiasDeSemana()
-          };
-          const createResult = await client.graphql({
-            query: createSemana,
-            variables: { input: nuevaSemana }
+        const { username, userId } = await getCurrentUser();
+        const semanaActual = getCurrentWeek();
+        const user = await Auth.currentAuthenticatedUser();
+        try {
+          const result = await client.graphql({
+            query: getSemana,
+            variables: { userId: user.attributes.sub, semana: semanaActual }
           });
-          setSemana(createResult.data.createSemana);
+          if (result.data.getSemana) {
+            setSemana(result.data.getSemana);
+          } else {
+            const virtudObjetivo = virtudes[(getWeekNumber(new Date()) % 13)];
+            const nuevaSemana = {
+              userId: user.attributes.sub,
+              semana: semanaActual,
+              virtudObjetivo: virtudObjetivo.id,
+              dias: crearDiasDeSemana()
+            };
+            const createResult = await client.graphql({
+              query: createSemana,
+              variables: { input: nuevaSemana }
+            });
+            setSemana(createResult.data.createSemana);
+          }
+        } catch (error) {
+          console.error('Error fetching or creating semana:', error);
         }
       } catch (error) {
-        console.error('Error fetching or creating semana:', error);
+        console.error('Error fetching user:', error);
       }
     };
 
